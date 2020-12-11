@@ -1,5 +1,6 @@
+import argparse
+
 import PIL.Image as Image
-import math
 
 
 class ImageProcessing:
@@ -136,7 +137,7 @@ class ImageProcessing:
 
         self.save_image(new, f'{self.path.split(".")[0]}_color_filter_{color.upper()}')
 
-    def set_contrast(self, contrast: float) -> None:
+    def set_contrast(self, contrast) -> None:
         """
 
         :param contrast:
@@ -144,6 +145,7 @@ class ImageProcessing:
         :alter the image contrast
 
         """
+        contrast = float(contrast)
         width, height = self._image.size
 
         new = self.create_image(width, height)
@@ -193,9 +195,42 @@ class ImageProcessing:
 
 
 if __name__ == '__main__':
-    ip = ImageProcessing('img/cp2077.jpg')
-    ip.set_contrast(2)
-    ip.convert_grayscale()
-    ip.invert()
-    ip.set_brightness(60)
-    ip.color_filter('red')
+    ip = None
+    parser = argparse.ArgumentParser(prog='PROG', usage='%(prog)s [options]')
+    sub_parser = parser.add_subparsers(dest='command', metavar='command')
+    sub_parser.required = True
+
+    sub_parser = sub_parser.add_parser('start', help='start work with image path')
+    sub_parser.add_argument('path', nargs='+', metavar='path', help='Image path')
+    sub_parser.add_argument('opt', nargs='+', metavar='opt',
+                            help='Chose operation: 0 -> contrast, 1 -> Brightness, 2 -> Color Filter, ' +
+                                 '3 -> Invert image, 4 -> Change image to gray scale')
+    sub_parser.add_argument('-int', nargs='?', metavar='--int',
+                            help='chose some intensity to contrast(0 to 4) or brightness(-255 to +255)' +
+                                 ' or color filter(red, green and blue)')
+
+    args = parser.parse_args()
+    if args.command == 'start':
+        print('Loading ...')
+        ip = ImageProcessing(args.path[0])
+        if args.opt[0] == '0':
+            if args.int[0] is None:
+                print('Please info intensity')
+            else:
+                ip.set_contrast(args.int[0])
+        elif args.opt[0] == '1':
+            if args.int[0] is None:
+                print('Please info intensity')
+            else:
+                ip.set_brightness(args.int[0])
+        elif args.opt[0] == '2':
+            if args.int[0] is None:
+                print('Please info intensity')
+            else:
+                ip.set_brightness(args.int[0])
+        elif args.opt[0] == '3':
+            ip.invert()
+        elif args.opt[0] == '4':
+            ip.convert_grayscale()
+
+        print('Finished image processing!')
